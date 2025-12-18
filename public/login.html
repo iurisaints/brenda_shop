@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Profe Brenda</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Acesso ao Aluno</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="auth-box">
+            <h2 style="text-align:center; color:var(--blue-navy)">Bem-vindo de volta</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-auth">ENTRAR</button>
+            </form>
+            <div class="auth-links">
+                Ainda não tem conta? <a href="cadastro.html">Cadastre-se aqui</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Substitua a função handleLogin antiga por esta:
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Salva token e dados
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userName', data.name);
+
+                // --- REDIRECIONAMENTO INTELIGENTE ---
+                if (data.role === 'admin') {
+                    window.location.href = 'admin.html'; // Admin vai pro painel
+                } else {
+                    window.location.href = 'index.html'; // Aluno vai pra loja
+                }
+            } else {
+                alert(data.error);
+            }
+        }
+    </script>
+</body>
+
+</html>

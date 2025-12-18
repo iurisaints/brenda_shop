@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>Loja Oficial | Professora Brenda Flores</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="app.js"></script>
+    <script src="cart.js" defer></script>
+</head>
+
+    <div id="cart-modal" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h3>Seu Carrinho</h3>
+                <button onclick="toggleCart()" class="close-modal">&times;</button>
+            </div>
+
+            <div id="cart-items-container" class="cart-body">
+            </div>
+
+            <div class="cart-footer">
+                <div class="total-row">
+                    <span>Total:</span>
+                    <span id="cart-total-value">R$ 0,00</span>
+                </div>
+                <button id="btn-checkout-final" class="btn-buy" onclick="checkoutCart()">
+                    FINALIZAR COMPRA
+                </button>
+            </div>
+        </div>
+    </div>
+
+<body onload="checkAuth(); loadProducts()">
+
+    <header>
+        <div class="header-content">
+            <div class="logo-circle">
+                <span>m</span>
+            </div>
+
+            <div class="titles">
+                <h1>Professora Brenda Flores</h1>
+                <p>Materiais Pedagógicos e PDFs Exclusivos</p>
+            </div>
+
+            <div class="nav-actions">
+                <div class="cart-icon-container" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="cart-badge">0</span>
+                </div>
+
+                <div id="user-nav" class="user-nav"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="loading" class="loading-spinner">
+            <i class="fas fa-circle-notch fa-spin"></i> Carregando materiais...
+        </div>
+
+        <div id="products" class="products-grid">
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 Brenda Flores. Todos os direitos reservados.</p>
+        <p style="font-size: 0.8rem; opacity: 0.7;">Desenvolvido com tecnologia segura.</p>
+    </footer>
+
+    <script src="configs.js"> </script>
+
+</body>
+
+</html>

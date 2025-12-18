@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js"></script>
+</head>
+
+<body onload="checkAuth(); loadMyOrders()">
+
+    <header>
+        <div class="header-content">
+            <h1>Meus Materiais</h1>
+            <div id="user-nav" class="user-nav"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 style="margin-bottom: 20px; color: var(--blue-navy);">Downloads Disponíveis</h2>
+        <div id="orders-list">
+            Carregando...
+        </div>
+    </div>
+
+    <script>
+        // Verifica login e carrega pedidos
+        async function initPage() {
+            checkAuth();
+
+            // LENDO PARÂMETROS DO MERCADO PAGO
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status'); // approved, pending, failure
+            const paymentId = urlParams.get('collection_id') || urlParams.get('payment_id');
+            const externalRef = urlParams.get('external_reference');
+
+            if (status === 'approved' && paymentId && externalRef) {
+                document.getElementById('orders-list').innerHTML = '<p>Validando seu pagamento com o Mercado Pago...</p>';
+
+                try {
+                    await authFetch(`${API_URL}/verify-payment`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            payment_id: paymentId,
+                            external_reference: externalRef
+                        })
+                    });
+
+                    // Limpa URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    alert("Sucesso! Material liberado.");
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            loadMyOrders();
+        }
+
+        async function loadMyOrders() {
+            const res = await authFetch(`${API_URL}/my-orders`);
+            const orders = await res.json();
+            const list = document.getElementById('orders-list');
+
+            list.innerHTML = '';
+
+            if (orders.length === 0) {
+                list.innerHTML = '<p>Você ainda não possui materiais liberados.</p>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const date = new Date(order.created_at).toLocaleDateString('pt-BR');
+                const div = document.createElement('div');
+                div.className = 'order-card';
+                div.innerHTML = `
+                <div>
+                    <strong style="font-size:1.1rem; color:var(--blue-navy)">${order.title}</strong><br>
+                    <small style="color:#666">Liberado em: ${date}</small>
+                </div>
+                <button class="btn-download-sm" onclick="downloadFile(${order.product_id})">
+                    <i class="fas fa-download"></i> BAIXAR PDF
+                </button>
+            `;
+                list.appendChild(div);
+            });
+        }
+
+        // Função de Download do BLOB
+        async function downloadFile(productId) {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerText = "Baixando...";
+            btn.disabled = true;
+
+            try {
+                // Pede o link
+                const resLink = await authFetch(`${API_URL}/get-download-link`, {
+                    method: 'POST',
+                    body: JSON.stringify({ productId: productId })
+                });
+                const data = await resLink.json();
+
+                if (data.url) {
+                    // Força o download
+                    window.location.href = data.url;
+                } else {
+                    alert("Erro ao gerar link.");
+                }
+            } catch (e) {
+                alert("Erro ao baixar.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Inicia tudo
+        initPage();
+    </script>
+</body>
+
+</html>
