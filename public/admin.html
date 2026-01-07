@@ -1,210 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin | Brenda Flores</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Painel Admin | Brenda</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="app.js"></script>
+    <link rel="stylesheet" href="./styles/styles.css">
     <style>
-        .admin-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
+        .admin-wrapper { max-width: 800px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .product-list-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .product-info { display: flex; align-items: center; gap: 15px; }
+        .product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; }
+        
+        /* Botões de Ação */
+        .actions { display: flex; gap: 10px; }
+        .btn-icon { width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border: none; }
+        .edit-btn { background: #e0f2fe; color: var(--blue-navy); }
+        .edit-btn:hover { background: var(--blue-navy); color: white; }
+        .delete-btn { background: #fee2e2; color: #ef4444; }
+        .delete-btn:hover { background: #ef4444; color: white; }
 
-        /* Cards de Estatísticas */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            border-bottom: 4px solid var(--blue-navy);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--blue-navy);
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        /* Formulário de Upload */
-        .admin-form {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 100px;
-        }
-
-        .file-input-wrapper {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-
-        .file-input-wrapper:hover {
-            border-color: var(--blue-navy);
-            background: #f9f9f9;
-        }
+        /* Botão Cancelar */
+        #btn-cancel { background: #ccc; color: #333; margin-top: 10px; width: 100%; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #btn-cancel:hover { background: #bbb; }
     </style>
 </head>
+<body>
 
-<body onload="checkAdminAccess()">
+    <div class="top-bar">ÁREA RESTRITA - GERENCIAMENTO</div>
 
-    <header>
-        <div class="header-content">
-            <h1>Painel Administrativo</h1>
-            <button onclick="logout()" class="btn-logout" style="border:1px solid white">Sair</button>
-        </div>
-    </header>
-
-    <div class="admin-container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="total-revenue">R$ 0,00</div>
-                <div class="stat-label">Faturamento Total</div>
+    <div class="container">
+        <div class="admin-wrapper">
+            
+            <div class="admin-header">
+                <h2 style="color:var(--blue-navy);">Gerenciar Produtos</h2>
+                <a href="index.html" class="btn-buy" style="width:auto; padding:8px 20px; font-size:0.9rem; text-decoration:none;">
+                    <i class="fas fa-store"></i> Voltar à Loja
+                </a>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-sales">0</div>
-                <div class="stat-label">Vendas Realizadas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-users">0</div>
-                <div class="stat-label">Alunos Cadastrados</div>
-            </div>
-        </div>
 
-        <div class="admin-form">
-            <h2 style="color:var(--blue-navy); margin-bottom:20px;">Cadastrar Novo Material</h2>
-            <form onsubmit="handleProductUpload(event)">
-                <div class="form-row">
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; border: 1px solid #bae6fd; margin-bottom: 30px;">
+                <h3 id="form-title" style="color:var(--blue-navy); margin-bottom:15px; font-size:1.1rem;">+ Novo Produto</h3>
+                
+                <form id="product-form" onsubmit="handleProductSubmit(event)">
+                    <input type="hidden" id="p-id">
+
                     <div class="form-group">
-                        <label>Título do Material</label>
-                        <input type="text" id="p-title" required placeholder="Ex: Apostila 2025">
+                        <label>Título</label>
+                        <input type="text" id="p-title" required>
                     </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Preço (R$)</label>
+                            <input type="number" id="p-price" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="p-category">
+                                <option value="Ensino Fundamental">Ensino Fundamental</option>
+                                <option value="Ensino Médio">Ensino Médio</option>
+                                <option value="BNCC">BNCC</option>
+                                <option value="Inglês">Inglês</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label>Preço (R$)</label>
-                        <input type="number" step="0.01" id="p-price" required placeholder="29.90">
+                        <label>Descrição</label>
+                        <textarea id="p-desc" rows="2"></textarea>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>URL da Imagem da Capa</label>
-                    <input type="url" id="p-image" required placeholder="https://...">
-                    <small>Dica: Use um link do Google Drive (público) ou Imgur.</small>
-                </div>
+                    <div class="form-group">
+                        <label>📸 Imagem do Produto</label>
+                        <input type="file" id="p-image" accept="image/*">
+                        <small style="color:#666; font-size:0.8rem;">(Opcional na edição)</small>
+                    </div>
 
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea id="p-desc" required></textarea>
-                </div>
+                    <button type="submit" id="btn-save" class="btn-buy">CADASTRAR PRODUTO</button>
+                    
+                    <button type="button" id="btn-cancel" onclick="cancelEditMode()" style="display:none;">
+                        CANCELAR EDIÇÃO
+                    </button>
+                </form>
+            </div>
 
-                <div class="form-group">
-                    <label>Arquivo PDF (Produto)</label>
-                    <input type="file" id="p-file" accept="application/pdf" required style="margin-top:5px;">
-                </div>
+            <h3 style="margin-bottom: 15px; color: var(--blue-navy);">Lista de Itens</h3>
+            <div id="admin-product-list">
+                <p style="text-align: center; color: #888;">Carregando...</p>
+            </div>
 
-                <button type="submit" class="btn-buy" id="btn-submit">CADASTRAR PRODUTO</button>
-            </form>
         </div>
     </div>
 
-    <script>
-        // 1. Verifica se é Admin mesmo
-        async function checkAdminAccess() {
-            const token = localStorage.getItem('token');
-            if (!token) window.location.href = 'login.html';
-
-            // Tenta pegar stats. Se falhar (403), não é admin.
-            try {
-                const res = await authFetch(`${API_URL}/admin/stats`);
-                if (res.status === 403) {
-                    alert("Acesso exclusivo para administradores.");
-                    window.location.href = 'index.html';
-                    return;
-                }
-                const data = await res.json();
-
-                // Preenche dashboard
-                document.getElementById('total-revenue').innerText =
-                    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.total_revenue || 0);
-                document.getElementById('total-sales').innerText = data.total_sales;
-                document.getElementById('total-users').innerText = data.total_users;
-
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        // 2. Enviar Produto (Upload)
-        async function handleProductUpload(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-submit');
-            btn.innerText = "ENVIANDO PRO BANCO...";
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('title', document.getElementById('p-title').value);
-            formData.append('price', document.getElementById('p-price').value);
-            formData.append('description', document.getElementById('p-desc').value);
-            formData.append('image_url', document.getElementById('p-image').value);
-            formData.append('pdfFile', document.getElementById('p-file').files[0]);
-
-            try {
-                const res = await fetch(`${API_URL}/admin/products`, { // Rota antiga, mas backend novo
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: formData
-                });
-
-                if (res.ok) {
-                    alert("Salvo com sucesso!");
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert("Erro: " + err.error);
-                    btn.disabled = false;
-                }
-            } catch (error) {
-                alert("Erro de conexão.");
-                btn.disabled = false;
-            }
-        }
-    </script>
+    <script src="./scripts/app.js"></script>
+    <script src="./scripts/script-admin.js"></script>
 </body>
-
 </html>
