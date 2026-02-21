@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:3000/api'; // Mude para URL de produção no final
+// O navegador descobre sozinho se está no seu PC ou no Railway
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api'
+    : '/api';
 
 // Verifica se está logado ao carregar
 function checkAuth() {
@@ -45,4 +48,5 @@ async function authFetch(url, options = {}) {
         window.location.href = 'login.html';
     }
     return response;
+
 }
